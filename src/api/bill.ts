@@ -10,15 +10,20 @@ export interface IBill {
   recordedAt: string,
 }
 
+interface IGetBillsResponse {
+  recordedAtByMonth: string,
+  bills: IBill[]
+}
+
 /**
  * @description 拉取用户账目数据
- * @param {Number} page - 页码，当前固定每页100条数据
+ * @param {String} date - 拉取时间
  */
-const getBills: (page: number) => Promise<IStandardResponse<{ bills: IBill[] }>> = page => request({
+const getBills: (date: string) => Promise<IStandardResponse<IGetBillsResponse>> = date => request({
   url: `${HOST}/bills`,
   method: 'GET',
   data: {
-    page,
+    date,
   }
 });
 
