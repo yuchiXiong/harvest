@@ -1,19 +1,25 @@
 import Taro from "@tarojs/taro";
 
+/**
+ * @description 通用请求参数数据结构
+ */
 interface IRequestParams {
   url: string,
   method: 'OPTIONS' | 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'TRACE' | 'CONNECT',
   data: Object,
 }
 
-export interface ISuccessResponse<T> {
-  data: T
+/**
+ * @description 通用响应结构，当接口请求成功时，包含data属性，反之包含errorMessage属性
+ */
+export interface IResponse<T> {
+  data: T;
+  errorMessage: string;
 }
 
-export interface IErrorResponse {
-  errorMessage: string
-}
-
+/**
+ * @description Login接口的响应数据结构
+ */
 interface ILoginResponse {
   data: {
     jwt: string
@@ -46,6 +52,7 @@ const login = () => new Promise((resolve, reject) => {
 /**
  * @description 请求前置
  * 1. 如果请求时无token，自动拉取token并携带token
+ * 2. 当接口返回401时，自动进行登录（当前小程序用户不会出现登录以后依然401的情况
  */
 Taro.addInterceptor(function (chain) {
   const requestParams = chain.requestParams
@@ -64,28 +71,44 @@ Taro.addInterceptor(function (chain) {
         }
         return chain.proceed(requestParams);
       } else {
-        return res.data;
+        return res;
       }
     });
 })
 
-const request: <T>(params: IRequestParams) => Promise<ISuccessResponse<T>> = params => {
+/**
+ * @description 通用请求实例
+ * @param {IRequestParams} params - 通用请求参数
+ * @returns {Promise<T>}
+ * 
+ * @example
+ *   request({ 
+ *     url: 'xxx', 
+ *     method: 'GET', 
+ *     data: {}
+ *   }).then(res => { 
+ *     console.log('接口数据', res) 
+ *   }, err => { 
+ *     console.log('错误信息', err) 
+ *   });
+ */
+const request: <T>(params: IRequestParams) => Promise<T> = params => {
   return new Promise((resolve, reject) => {
     Taro.request({
       url: params.url,
       method: params.method,
       data: params.data,
-      // success: <T>(res: ISuccessResponse<T> | IErrorResponse ) => void,
-      // success: (res: Taro.request.SuccessCallbackResult<ISuccessResponse<any>>) => {
-      //   if () {
-
-      //   } else {
-      //     // resolve(res.data);
-      //   }
-      // },
+      success: (res: Taro.request.SuccessCallbackResult<IResponse<any>>) => {
+        if (res.data.errorMessage) {
+          reject(res.data.errorMessage);
+        } else {
+          resolve(res.data.data);
+        }
+      },
       fail: reject
     })
   });
 }
+
 
 export default request;

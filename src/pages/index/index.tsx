@@ -19,13 +19,17 @@ const IndexPage = () => {
 
   const fetchMore = () => {
     API.getBills(dayjs().format('YYYY-MM-DD')).then(res => {
-      if (!res.errorMessage) {
-        setBills([...bills.concat(res.data.bills)]);
-        setMonth(dayjs(res.data.recordedAtByMonth).format('YYYY年M月'));
-        Taro.setNavigationBarTitle({
-          title: dayjs(res.data.recordedAtByMonth).format('YYYY年M月')
-        })
-      }
+      setBills([...bills.concat(res.bills)]);
+      setMonth(dayjs(res.recordedAtByMonth).format('YYYY年M月'));
+      Taro.setNavigationBarTitle({
+        title: dayjs(res.recordedAtByMonth).format('YYYY年M月')
+      })
+    }, error => {
+      Taro.showToast({
+        title: error,
+        icon: "none",
+        duration: 2000
+      });
     });
   }
 

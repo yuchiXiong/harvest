@@ -19,7 +19,7 @@ interface IGetBillsResponse {
  * @description 拉取用户账目数据
  * @param {String} date - 拉取时间
  */
-const getBills = date => request<IGetBillsResponse>({
+const getBills = (date: string) => request<IGetBillsResponse>({
   url: `${HOST}/bills`,
   method: 'GET',
   data: {
