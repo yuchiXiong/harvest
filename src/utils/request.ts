@@ -3,12 +3,15 @@ import Taro from "@tarojs/taro";
 interface IRequestParams {
   url: string,
   method: 'OPTIONS' | 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'TRACE' | 'CONNECT',
-  data?: Object
+  data: Object,
 }
 
-export interface IStandardResponse<T> {
-  data?: T
-  errorMessage?: string
+export interface ISuccessResponse<T> {
+  data: T
+}
+
+export interface IErrorResponse {
+  errorMessage: string
 }
 
 interface ILoginResponse {
@@ -29,8 +32,8 @@ const login = () => new Promise((resolve, reject) => {
         data: {
           code: res.code
         },
-        success: (res) => {
-          const response = res.data as ILoginResponse;
+        success: ({ data }) => {
+          const response = data as ILoginResponse;
           Taro.setStorageSync('harvest:jwt', response.data.jwt);
           resolve(response.data.jwt);
         },
@@ -66,15 +69,20 @@ Taro.addInterceptor(function (chain) {
     });
 })
 
-const request: (params: IRequestParams) => Promise<IStandardResponse<any>> = params => {
+const request: <T>(params: IRequestParams) => Promise<ISuccessResponse<T>> = params => {
   return new Promise((resolve, reject) => {
     Taro.request({
       url: params.url,
       method: params.method,
       data: params.data,
-      success: (res) => {
-        resolve(res.data);
-      },
+      // success: <T>(res: ISuccessResponse<T> | IErrorResponse ) => void,
+      // success: (res: Taro.request.SuccessCallbackResult<ISuccessResponse<any>>) => {
+      //   if () {
+
+      //   } else {
+      //     // resolve(res.data);
+      //   }
+      // },
       fail: reject
     })
   });

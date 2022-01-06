@@ -1,5 +1,5 @@
 import { HOST } from '../config/config';
-import request, { IStandardResponse } from '../utils/request';
+import request from '../utils/request';
 
 export interface IBill {
   amount: string,
@@ -19,7 +19,7 @@ interface IGetBillsResponse {
  * @description 拉取用户账目数据
  * @param {String} date - 拉取时间
  */
-const getBills: (date: string) => Promise<IStandardResponse<IGetBillsResponse>> = date => request({
+const getBills = date => request<IGetBillsResponse>({
   url: `${HOST}/bills`,
   method: 'GET',
   data: {
